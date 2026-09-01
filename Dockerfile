@@ -37,9 +37,8 @@ COPY --from=builder /app/src/mitm ./src/mitm
 COPY --from=builder /app/node_modules/node-forge ./node_modules/node-forge
 # Ensure `next` is available at runtime in case tracing did not include it.
 COPY --from=builder /app/node_modules/next ./node_modules/next
-# sql.js loads dist/sql-wasm.wasm by path at runtime; tracing only follows JS imports,
-# so the last-resort DB driver would abort with ENOENT on the missing binary.
-COPY --from=builder /app/node_modules/sql.js ./node_modules/sql.js
+# (This fork is Postgres-only. `pg` is in serverExternalPackages and Next's
+# tracing already vendors it into .next/standalone/node_modules.)
 
 RUN mkdir -p /app/data && chown -R node:node /app && \
   mkdir -p /app/data-home && chown node:node /app/data-home && \
