@@ -28,6 +28,7 @@ Schema is created automatically on first connect — no manual DDL.
 | 7 | **Per-combo account allow-list** — each combo's "Keys" button: restrict a provider to selected groups / individual keys (falls through if none match). Stored in `settings.comboStrategies[combo].accountFilters`. | combos page, `chat.js`, `auth.js` |
 | 8 | **Supabase support** — works against the Supavisor transaction pooler (`PG_POOL_MAX=1`); `.env.example` + docs cover both pooler modes. | `pg.js`, docs |
 | 9 | **`USAGE_HISTORY_RETENTION_DAYS`** (default 30) — prunes raw `usageHistory` rows older than N days, ≤1×/hour; keeps the DB bounded for a small free tier. | `usageRepo.js` |
+| 10 | **`deploy` branch + `npm run build:standalone`** — build a self-contained `.next/standalone` snapshot locally and ship it to a small VPS instead of building there (see [Deploying](#deploying)). | `scripts/build-standalone.js` |
 
 Full details + env contract: [`MIGRATION_POSTGRES.md`](./MIGRATION_POSTGRES.md).
 
@@ -44,11 +45,6 @@ branched from.
 
 ## Deploying
 
-It's a long-running Node server — run it as a **container** on a VPS (the
-`Dockerfile` works as-is; see [`DOCKER.md`](./DOCKER.md) for the full compose
-setup). The DB can be external (Aiven or Supabase) or a Postgres container
-alongside it (`docker-compose.pg.yml`).
-
 **Database, pick one:**
 
 | | `DATABASE_URL` | plus |
@@ -59,6 +55,45 @@ alongside it (`docker-compose.pg.yml`).
 
 Schema auto-creates on first boot. Moving data from an old instance:
 `node scripts/db-copy.mjs "<OLD_URL>" "<NEW_URL>"` (see `MIGRATION_POSTGRES.md`).
+
+### Option A — `deploy` branch (recommended for small/free-tier VPS)
+
+Building Next.js on a low-RAM/burstable-CPU box (e.g. GCP `e2-micro`) thrashes
+badly — swap-backed compilation that takes 2 minutes locally can take over an
+hour there. Instead, build locally and ship the finished `.next/standalone`
+output; the VPS only ever runs `node`, never `npm install`/`next build`.
+
+```bash
+npm run build:standalone      # builds .next/standalone locally
+```
+
+Push the standalone output to a dedicated `deploy` branch (no build artifacts
+on `master`) — see `scripts/build-standalone.js`'s header comment for why a
+scratch `HOME` is needed on Windows. Then on the VPS:
+
+```bash
+git clone -b deploy https://github.com/<you>/9router.git
+cd 9router
+nano .env      # JWT_SECRET, INITIAL_PASSWORD, DATABASE_URL, API_KEY_SECRET, MACHINE_ID_SALT, PORT=20128
+node custom-server.js
+```
+
+Run it under a process manager so it survives SSH disconnects/reboots:
+
+```bash
+sudo npm install -g pm2
+PORT=20128 pm2 start custom-server.js --name 9router
+pm2 save && pm2 startup   # follow the printed command to enable on boot
+```
+
+Open the port in your cloud provider's firewall (GCP: **VPC network →
+Firewall** — the newer "Firewall policies" page needs an explicit network
+association to take effect; the classic Firewall Rules page doesn't).
+
+### Option B — Docker
+
+It's a long-running Node server — run it as a **container** (the `Dockerfile`
+works as-is; see [`DOCKER.md`](./DOCKER.md) for the full compose setup).
 
 ```bash
 git clone <your fork> && cd 9router

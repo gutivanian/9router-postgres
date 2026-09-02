@@ -21,6 +21,13 @@
 
 </div>
 
+> **📌 This is a fork** ([`gutivanian/9router`](https://github.com/gutivanian/9router)) of the upstream project above, with a few things added on top:
+> - **PostgreSQL storage** — replaces the SQLite layer (Aiven, Supabase, or self-hosted).
+> - **Connection groups** — tag, search, and bulk-manage provider API keys/accounts; per-combo account allow-lists.
+> - **`deploy` branch** — a prebuilt, ready-to-run snapshot for shipping to a small/free-tier VPS without building on it. See [`README_FORK.md`](./README_FORK.md) for the full list of changes and deploy instructions.
+>
+> Everything below this notice is the original upstream README.
+
 ---
 
 ## 🤔 Why 9Router?
