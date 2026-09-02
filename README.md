@@ -74,7 +74,7 @@ on `master`) — see `scripts/build-standalone.js`'s header comment for why a
 scratch `HOME` is needed on Windows. Then on the VPS:
 
 ```bash
-git clone -b deploy https://github.com/<you>/9router.git
+git clone -b deploy https://github.com/gutivanian/9router.git
 cd 9router
 nano .env      # JWT_SECRET, INITIAL_PASSWORD, DATABASE_URL, API_KEY_SECRET, MACHINE_ID_SALT, PORT=20128
 node custom-server.js
@@ -98,7 +98,7 @@ It's a long-running Node server — run it as a **container** (the `Dockerfile`
 works as-is; see [`DOCKER.md`](./DOCKER.md) for the full compose setup).
 
 ```bash
-git clone <your fork> && cd 9router
+git clone https://github.com/gutivanian/9router.git && cd 9router
 cp .env.example .env      # DATABASE_URL, JWT_SECRET, INITIAL_PASSWORD, API_KEY_SECRET, MACHINE_ID_SALT
 docker compose up -d --build
 ```
