@@ -15,7 +15,7 @@ import { AI_PROVIDERS } from "@/shared/constants/providers";
 import { getProviderIconSrc, markProviderIconMissing } from "@/shared/utils/providerIcon";
 
 // Force-stop FE animation if a provider stays active longer than this
-const FE_ACTIVE_TIMEOUT_MS = 60000;
+const FE_ACTIVE_TIMEOUT_MS = 120000;
 const FE_ACTIVE_TICK_MS = 1000;
 
 // Kame + electric particles along active edges
