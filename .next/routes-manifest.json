@@ -690,6 +690,12 @@
       "namedRegex": "^/api/providers/client(?:/)?$"
     },
     {
+      "page": "/api/providers/export",
+      "regex": "^/api/providers/export(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/providers/export(?:/)?$"
+    },
+    {
       "page": "/api/providers/kilo/free-models",
       "regex": "^/api/providers/kilo/free\\-models(?:/)?$",
       "routeKeys": {},
