@@ -350,6 +350,33 @@ export default function ProviderDetailPage() {
     }
   }, [providerId, isCompatible]);
 
+  const [exportingKeys, setExportingKeys] = useState(false);
+  const handleExportKeys = useCallback(async () => {
+    setExportingKeys(true);
+    try {
+      const res = await fetch(`/api/providers/export?provider=${encodeURIComponent(providerId)}`, { cache: "no-store" });
+      if (!res.ok) throw new Error("Failed to export keys");
+      const { lines = [] } = await res.json();
+      if (lines.length === 0) return;
+
+      // Same name|apiKey|group format AddApiKeyModal's bulk-add textarea parses
+      // back in (src/shared/utils/bulkAdd.js) — export/import round-trips.
+      const blob = new Blob([lines.join("\n")], { type: "text/plain" });
+      const url = URL.createObjectURL(blob);
+      const anchor = document.createElement("a");
+      anchor.href = url;
+      anchor.download = `${providerId}-keys.txt`;
+      document.body.appendChild(anchor);
+      anchor.click();
+      document.body.removeChild(anchor);
+      URL.revokeObjectURL(url);
+    } catch (error) {
+      console.log("Error exporting keys:", error);
+    } finally {
+      setExportingKeys(false);
+    }
+  }, [providerId]);
+
   const handleUpdateNode = async (formData) => {
     try {
       const res = await fetch(`/api/provider-nodes/${providerId}`, {
@@ -1679,6 +1706,17 @@ export default function ProviderDetailPage() {
                     />
                     {connFilterActive ? `Select ${visibleConnections.length} filtered` : "Select All"}
                   </label>
+                  <Button
+                    size="sm"
+                    variant="secondary"
+                    icon={exportingKeys ? "progress_activity" : "download"}
+                    onClick={handleExportKeys}
+                    disabled={exportingKeys}
+                    className="ml-auto"
+                    title="Export as name|apiKey|group .txt (same format as bulk-add)"
+                  >
+                    Export
+                  </Button>
                 </div>
               )}
               {connectionsList}
